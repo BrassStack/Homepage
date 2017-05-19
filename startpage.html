@@ -1,0 +1,364 @@
+<!doctype html>
+<html>
+    <head>
+        <title>New Tab</title>
+        <style>
+            body {
+                background: url(images/bg.jpg) no-repeat 50% 0 #142430 fixed;
+                color: #ccc;
+                text-shadow: 1px 1px 10px #fff;
+                text-align: center;
+                font-family: "Arial", sans-serif;
+                padding: 0px;
+                margin: 0px;
+            }
+
+            /* Sections of links */
+            .main {
+                display: block;
+                width: 90%;
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+                padding-top: 3em;
+                align-items: center;
+            }
+
+            /* Link outer box, big enough for hover expand */
+            section {
+                display:inline-block;
+                margin: -1em;
+
+                /* Leave enough room for the boxes to grow */
+                height: 14.5em;
+                width: 20.5em;
+            }
+
+            /* Link inner box which expands on hover */
+            section div {
+                display: block;
+                position: relative;
+                float: left;
+
+                /* Any time you adjust these you may need to adjust section height & width as well */
+                margin: 2.5em;
+                padding: 0.5em;
+                height: 7em;
+                width: 12em;
+                border: .75em solid #444;
+
+                border-radius: 2em;
+                transition-duration: 300ms;
+            }
+            section div:hover {
+                border-color: #33478b;
+                /* Increases the size of everything! */
+                font-size: 130%;
+                margin: 0.5em;
+                box-shadow: 0em 0em 1em #fff;
+            }
+
+            /* Standard links */
+            a {
+                color: #ccc;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+                border: none;
+            }
+            a:hover {
+                color: #fff;
+            }
+
+            /* Header menu links */
+            menu a {
+                font-size: 150%;
+                font-variant: small-caps;
+                letter-spacing: 0.2em;
+                transition: color 200ms ease-in;
+            }
+
+            /* Section header */
+            h1 {
+                font-size: 200%;
+                font-variant: small-caps;
+                letter-spacing: 0.5em;
+                transition: color 200ms ease-in;
+                text-shadow: 1px 1px 10px #142430;
+            }
+
+            /* Link images */
+            img {
+                display: block;
+                height: 80%;
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+                border: none;
+            }
+            img.full {
+                height: 100%;
+            }
+
+            /* Link labels */
+            p {
+                margin: 5px 0px 0px 0px;
+                padding: 0px;
+                border: none;
+            }
+
+            /* Shrink to icons only on small screens */
+            @media screen and (max-width: 800px) {
+                body {
+                    font-size: 50%
+                }
+                p {
+                    height: 0;
+                    width: 0;
+                    display: none;
+                }
+                img {
+                    height: 100%;
+                }
+                section div:hover {
+                    font-size: 150%;
+                    margin: 1em;
+                }
+            }
+        </style>
+        <script>
+            function ToggleDisplay( obj )
+            {
+                if( obj.style.fontSize == "0%" )
+                    obj.style.fontSize = obj.oldSize;
+                else
+                {
+                    obj.oldSize = obj.style.fontSize;
+                    obj.style.fontSize = "0%";
+                }
+                return true;
+            }
+
+            // REMOVE THIS LINE WHEN UPLOADING TO A WEB SERVER //
+            // This allows you to use localStorage on a local file in IE if you have the localhost IP address in trusted sites
+            !localStorage && (l = location, p = l.pathname.replace(/(^..)(:)/, "$1$$"), (l.href = l.protocol + "//127.0.0.1" + p));
+            /////////////////////////////////////////////////////
+
+            var pageSections = [];
+
+            function initPage()
+            {
+                var savedLinks = JSON.parse( localStorage.getItem( 'savedLinks' ) );
+
+                if ( savedLinks )
+                {
+                    for ( var i = 0; i < savedLinks.length; i++ )
+                    {
+                        pageSections[i] = new Section( savedLinks[i]['label'], savedLinks[i]['links'] );
+                        pageSections[i].init( i );
+                    }
+                }
+
+                if ( pageSections.length == 0 )
+                {
+                    // if nothing was found, bring up the dialogue box to add a link/section here
+                }
+            }
+
+            function Section( label, links )
+            {
+                this.label = label;
+                this.links = links;
+
+                this.init = function ( sectionId ) {
+                    var newSection = document.createElement( 'div' );
+                    newSection.className = 'main';
+                    /*
+                    NEED TO DO SOMETHING WITH THE SECTION LABEL
+                    */
+                    newSection.id = sectionId;
+                    document.getElementById( 'links' ).appendChild( newSection );
+
+                    if ( this.links.length )
+                    {
+                        for ( var i = 0; i < this.links.length; i++ )
+                        {
+                            this.links[i] = new Link( this.links[i]['href'], this.links[i]['label'], this.links[i]['imgSource'] );
+                            this.links[i].init( sectionId, i );
+                        }
+                    }
+                }
+            }
+
+			function Link( href, label, imgSource )
+            {
+                this.href      = href;
+                this.label     = label;
+                this.imgSource = imgSource;
+
+                this.init = function ( sectionId, linkId ) {
+                    var newLink = document.createElement( 'a' );
+                    newLink.href = this.href;
+                    newLink.title = this.label;
+                    newLink.id = sectionId.toString() + '.' + linkId.toString();;
+                    
+                    var newSection = document.createElement( 'section' );
+                    var newDiv = document.createElement( 'div' );
+
+                    var newImg = document.createElement( 'img' );
+                    newImg.src = this.imgSource;
+
+                    var newLabel = document.createElement( 'p' );
+                    newLabel.innerHTML = this.label;
+
+                    newDiv.appendChild( newImg );
+                    newDiv.appendChild( newLabel );
+                    newSection.appendChild( newDiv );
+                    newLink.appendChild( newSection );
+                    document.getElementById( sectionId ).appendChild( newLink );
+                }
+			}
+
+            function savePageState()
+            {
+                if ( pageSections.length > 0 )
+                {
+                    localStorage.setItem( 'savedLinks', JSON.stringify( pageSections ) );
+                }
+                else
+                {
+                    localStorage.removeItem( 'savedLinks' );
+                }
+            }
+
+            window.addEventListener
+            (
+                'unload',
+                function( evnt ) {
+                    savePageState();
+                }
+            );
+
+
+            /*************************************************************************/
+            function debugFunc()
+            {
+                if ( pageSections.length == 0 )
+                {
+                    var newLink = [ { 'href':'https://www.google.com', 'label':'Google', 'imgSource':'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' } ];
+                    pageSections[0] = new Section( 'Debug', newLink );
+                    pageSections[0].init( 0 );
+                }
+                else
+                {
+                    alert( 'Page already has some stuff...' );
+                }
+            }
+
+            function debugFunc2() {
+                pageSections = [];
+                if ( pageSections.length == 0 )
+                {
+                    alert( 'pageSections cleared successfully' );
+                }
+                else
+                {
+                    alert( 'pageSections NOT cleared successfully...?' );
+                }
+            }
+            /*************************************************************************/
+        </script>
+    </head>
+    <body onload="initPage();">
+        <menu id="header">
+            <h1>This is the header.</h1>
+            <a href="javascript:debugFunc();">Add Google.</a>
+            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+            <a href="javascript:debugFunc2();">Delete Google.</a>
+            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+            <a class='toggle' href='javascript:ToggleDisplay(document.getElementById("work"));'>Toggle Work</a>
+            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+            <a class='toggle' href='javascript:ToggleDisplay(document.getElementById("home"));'>Toggle Home</a>
+        </menu>
+        <div id="links"></div>
+        <div id='work' class='main'>
+            <h1>Work</h1>
+            <section><a href="https://colleague.indwes.edu/index_beta.htm" title="Colleague"><div>
+                <img src="images/app_icons/colleague.png">
+                <p>Colleague by Ellucian</p>
+            </div></a></section>
+            <section><a href="https://support.indwes.edu/rep/" title="iSupport"><div>
+                <img src="images/app_icons/isupport-software.png">
+                <p>iSupport</p>
+            </div></a></section>
+            <section><a href="https://kb.indwes.edu/Teams/UIT/SDT"><div>
+                <img class="full" src="images/app_icons/MindTouch_lighter.png">
+            </div></a></section>
+            <section><a href="https://myiwu.indwes.edu/groupsites/uit/sdt/default.aspx"><div>
+                <img src="images/app_icons/IWU-Athletics-Logo.png">
+                <p>MyIWU Portal</p>
+            </div></a></section>
+            <section><a href="https://www.office.com/1/"><div>
+                <img class="full" src="images/app_icons/office-365-cloud.png">
+            </div></a></section>
+            <section><a href="https://secure2.indwes.edu/HR/Attendance-Tracking/Default.aspx"><div>
+                <img src="images/app_icons/IWU-Athletics-Logo.png">
+                <p>Attendance Tracking</p>
+            </div></a></section>
+            <section><a href="https://secure2.indwes.edu/IT/Datatel-LPR/Default.aspx"><div>
+                <img src="images/app_icons/IWU-Athletics-Logo.png">
+                <p>LPR Browser</p>
+            </div></a></section>
+            <section><a href="https://indwes.visualstudio.com/_projects"><div>
+                <img src="images/app_icons/visual-studio.128x128.png">
+                <p>indwes.visualstudio.com</p>
+            </div></a></section>
+            <section><a href="https://secure2.indwes.edu/HR/Employee-Directory/"><div>
+                <img src="images/app_icons/IWU-Athletics-Logo.png">
+                <p>IWU Directory</p>
+            </div></a></section>
+            <section><a href="https://secure.ecollege.com/iwu/index.learn?action=welcome"><div>
+                <img src="images/app_icons/blank.png">
+                <p>LearningStudio</p>
+            </div></a></section>
+        </div>
+        <div id='home' class="main">
+            <h1>Home</h1>
+            <section><a href="https://mail.google.com/#"><div>
+                <img class="full" src="images/app_icons/gmail.png">
+            </div></a></section>
+            <section><a href="https://app.sycamoreeducation.com/index.php?schoolid=1426"><div>
+                <img src="images/app_icons/sycamore.png">
+                <p>Sycamore</p>
+            </div></a></section>
+            <section><a href="http://www.facebook.com/"><div>
+                <img class="full" src="images/app_icons/facebook.png">
+            </div></a></section>
+            <section><a href="http://www.sweetmarias.com/"><div>
+                <img class="full" src="images/app_icons/sweetmarias.png">
+            </div></a></section>
+            <section><a href="https://www.mint.com/"><div>
+                <img class="full" src="images/app_icons/mint_logo.png">
+            </div></a></section>
+            <section><a href="chrome-extension://hipbfijinpcgfogaopmgehiegacbhmob/gc-launcher.htm"><div>
+                <img src="images/app_icons/feedly.png">
+                <p>Feedly</p>
+            </div></a></section>
+            <section><a href="http://www.myfitnesspal.com/food/diary/kawillmert"><div>
+                <img class="full" src="images/app_icons/mfp.gif">
+            </div></a></section>
+            <section><a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?query=46938"><div>
+                <img class="full" src="images/app_icons/WeatherUnderground.jpg">
+            </div></a></section>
+            <section><a href="https://services.planningcenteronline.com/dashboard/0"><div>
+                <img class="full" src="images/app_icons/planningcenter.png">
+            </div></a></section>
+<!--  Template
+            <section><a href="#"><div>
+                <img src="images/app_icons/blank.png" title="">
+                <p>Here is a link</p>
+            </div></a></section>
+-->
+        </div>
+    </body>
+</html>
