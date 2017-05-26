@@ -116,7 +116,8 @@ p {
         height: 100%;
     }
     section div:hover {
-        font-size: 150%;
-        margin: 1em;
+        font-size: 140%;
+        margin: -0.25em;
+        margin-top: 0.4em;
     }
 }
