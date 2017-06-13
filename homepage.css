@@ -102,6 +102,50 @@ p {
     border: none;
 }
 
+/* Link add dialogue */
+#addLink {
+    font-size: 150%;
+    cursor: pointer;
+    position: fixed;
+    top: 1em;
+    left: 1em;
+}
+
+#addDialogue {
+    background-color: rgba(0, 0, 0, 0.75);
+    /* NEED TO MAKE RESPONSIVE */
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    margin: 0em;
+    top: 0em;
+    padding-top: 30%;
+}
+
+button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    padding: 0.25em 0.5em 0.25em 0.5em;
+    font-size: 150%;
+    background: none;
+    border: .1em solid #ccc;
+    border-radius: 1em;
+    color: #ccc;
+    text-shadow: 1px 1px 10px #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    border-color: #33478b;
+    box-shadow: 0em 0em 1em #fff;
+}
+
+.hidden {
+    display: none;
+}
+
 /* Shrink to icons only on small screens */
 @media screen and (max-width: 800px) {
     body {
