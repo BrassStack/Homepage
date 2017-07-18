@@ -11,32 +11,14 @@
     </head>
     <body onload="initPage();">
         <menu id="header"></menu>
-            <!-- <h1>The Willmert Home Page</h1> -->
-            <!--&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-            <a class='toggle' href='javascript:ToggleDisplay(document.getElementById("work"));'>Toggle Work</a>
-            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-            <a class='toggle' href='javascript:ToggleDisplay(document.getElementById("home"));'>Toggle Home</a>-->
-            <div>
+            <!-- <div>
             <a href="javascript:debugFunc();">Do Something</a>
             &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
             <a href="javascript:debugFunc2();">Clear Data</a>
-            </div>
-        <div id="sections">
-            <!--
-            <div id='home' class="main">
-                <h1>Home</h1>
-                <section><a href="https://mail.google.com/#"><div>
-                    <img class="full" src="images/app_icons/gmail.png">
-                    <p>Gmail</p>
-                </div></a></section>
-                <section><a href="http://www.sweetmarias.com/"><div>
-                    <img class="full" src="images/app_icons/sweetmarias.png">
-                    <p>Sweet Marias</p>
-                </div></a></section>
-            </div>
-            -->
-        </div>
+            </div> -->
+        <div id="sections"></div>
         <div id="addLink" onclick="showAddDialogue();">+</div>
+        <div id="importExportLink" onclick="showImportExportDialogue();">1</div>
         <menu id="addDialogue" class="hidden">
             <h1>Add a Page</h1>
             <h2>URL</h2>
@@ -48,6 +30,14 @@
             <h2>Section Name</h2>
             <input id="inputSection" type="text" />
             <button onclick="addNewLink();">Add</button>
+            <button onclick="cancelAddLink();">Cancel</button>
+        </menu>
+        <menu id="importExportDialogue" class="hidden">
+            <h1>Import / Export</h1>
+            <h3>Copy and save the below text to backup your sections and pages.<br />Replace the below with your backed-up text to load your backup.</h3>
+            <textarea id="importExportText"></textarea>
+            <button onclick="importContent();">Import</button>
+            <button onclick="closeImportExport();">Close</button>
         </menu>
     </body>
 </html>

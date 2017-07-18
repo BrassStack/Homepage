@@ -1,5 +1,6 @@
 body {
-    background: url(images/bg.jpg) no-repeat 50% 0 #142430 fixed;
+    /* Background image from http://backgrounds.mysitemyway.com */
+    background: url(images/bg.jpg) 50% 0 #142430 fixed;
     color: #ccc;
     text-shadow: 1px 1px 10px #fff;
     text-align: center;
@@ -80,6 +81,7 @@ h1 {
     letter-spacing: 0.5em;
     transition: color 200ms ease-in;
     text-shadow: 1px 1px 10px #142430;
+    cursor: default;
 }
 
 /* Link images */
@@ -112,14 +114,14 @@ p {
 }
 
 #addDialogue {
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.85);
     /* NEED TO MAKE RESPONSIVE */
     height: 100%;
     width: 100%;
     position: fixed;
     margin: 0em;
     top: 0em;
-    padding-top: 30%;
+    padding-top: 10%;
 }
 
 button {
@@ -136,6 +138,33 @@ button {
     text-shadow: 1px 1px 10px #fff;
     cursor: pointer;
 }
+
+/* Import/export dialogue */
+#importExportLink {
+    font-family: Wingdings;
+    font-size: 150%;
+    cursor: pointer;
+    position: fixed;
+    top: 1em;
+    right: 1em;
+}
+
+#importExportDialogue {
+    background-color: rgba(0, 0, 0, 0.85);
+    /* NEED TO MAKE RESPONSIVE */
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    margin: 0em;
+    top: 0em;
+    padding-top: 10%;
+}
+
+#importExportText {
+    width: 70%;
+    height: 20%;
+}
+
 
 button:hover {
     border-color: #33478b;
