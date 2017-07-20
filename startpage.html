@@ -1,111 +1,55 @@
 <!doctype html>
 <html>
-    <head>
-        <title>New Tab</title>
-        <link rel="stylesheet" type="text/css" href="homepage.css">
-        <script src="homepage.js"></script>
-    </head>
-    <body onload="initPage();">
 
-        <menu id="header">
-            <h1>The Willmert Home Page</h1>
-            <a href="javascript:debugFunc();">Add Google.</a>
-            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-            <a href="javascript:debugFunc2();">Delete Google.</a>
-            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-            <a class='toggle' href='javascript:ToggleDisplay(document.getElementById("work"));'>Toggle Work</a>
-            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-            <a class='toggle' href='javascript:ToggleDisplay(document.getElementById("home"));'>Toggle Home</a>
-        </menu>
+<head>
+    <title>New Tab</title>
+    <link rel="stylesheet" type="text/css" href="homepage.css" />
+    <link rel="stylesheet" href="jQuery-contextMenu/jquery.contextMenu.css" type="text/css" media="screen" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="jQuery-contextMenu/jquery.ui.position.js"></script>
+    <script src="jQuery-contextMenu/jquery.contextMenu.js"></script>
+    <script src="homepage.js"></script>
+</head>
 
-        <div class="xhtml">
+<body onload="initPage();">
+    <!-- <div>
+            <a href="javascript:debugFunc();">Do Something</a>
+            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+            <a href="javascript:debugFunc2();">Clear Data</a>
+            </div> -->
+    <div id="addLink" onclick="showAddDialogue();">+</div>
+    <div id="importExportLink" onclick="showImportExportDialogue();">1</div>
+    <menu id="addDialogue" class="hidden">
+        <h1>Add a Page</h1>
+        <h2>URL</h2>
+        <input id="inputUrl" type="text" />
+        <h2>Label</h2>
+        <input id="inputLabel" type="text" />
+        <h2>Image Source</h2>
+        <input id="inputImg" type="text" />
+        <h2>Section Name</h2>
+        <input id="inputSection" type="text" />
+        <button onclick="addNewLink();">Add</button>
+        <button onclick="cancelAddLink();">Cancel</button>
+    </menu>
+    <menu id="importExportDialogue" class="hidden">
+        <h1>Import / Export</h1>
+        <h3>Copy and save the below text to backup your sections and pages.<br />Replace the below with your backed-up text to
+            load your backup.</h3>
+        <textarea id="importExportText"></textarea>
+        <button onclick="importContent();">Import</button>
+        <button onclick="closeImportExport();">Close</button>
+    </menu>
+
+    <div class="xhtml">
         <div class="xbody">
+            <main id="slide">
+                <menu id="header"></menu>
+                <div id="sections"></div>
+            </main>
+        </div>
+    </div>
 
-        <main id="slide">
-        <div id="links"></div>
-        <div id='work' class='main'>
-            <h1>Work</h1>
-            <section><a href="https://colleague.indwes.edu/index_beta.htm" title="Colleague"><div>
-                <img src="images/app_icons/colleague.png">
-                <p>Colleague by Ellucian</p>
-            </div></a></section>
-            <section><a href="https://support.indwes.edu/rep/" title="iSupport"><div>
-                <img src="images/app_icons/isupport-software.png">
-                <p>iSupport</p>
-            </div></a></section>
-            <section><a href="https://kb.indwes.edu/Teams/UIT/SDT"><div>
-                <img class="full" src="images/app_icons/MindTouch_lighter.png">
-            </div></a></section>
-            <section><a href="https://myiwu.indwes.edu/groupsites/uit/sdt/default.aspx"><div>
-                <img src="images/app_icons/IWU-Athletics-Logo.png">
-                <p>MyIWU Portal</p>
-            </div></a></section>
-            <section><a href="https://www.office.com/1/"><div>
-                <img class="full" src="images/app_icons/office-365-cloud.png">
-            </div></a></section>
-            <section><a href="https://secure2.indwes.edu/HR/Attendance-Tracking/Default.aspx"><div>
-                <img src="images/app_icons/IWU-Athletics-Logo.png">
-                <p>Attendance Tracking</p>
-            </div></a></section>
-            <section><a href="https://secure2.indwes.edu/IT/Datatel-LPR/Default.aspx"><div>
-                <img src="images/app_icons/IWU-Athletics-Logo.png">
-                <p>LPR Browser</p>
-            </div></a></section>
-            <section><a href="https://indwes.visualstudio.com/_projects"><div>
-                <img src="images/app_icons/visual-studio.128x128.png">
-                <p>indwes.visualstudio.com</p>
-            </div></a></section>
-            <section><a href="https://secure2.indwes.edu/HR/Employee-Directory/"><div>
-                <img src="images/app_icons/IWU-Athletics-Logo.png">
-                <p>IWU Directory</p>
-            </div></a></section>
-            <section><a href="https://secure.ecollege.com/iwu/index.learn?action=welcome"><div>
-                <img src="images/app_icons/blank.png">
-                <p>LearningStudio</p>
-            </div></a></section>
-        </div>
-        <div id='home' class="main">
-            <h1>Home</h1>
-            <section><a href="https://mail.google.com/#"><div>
-                <img class="full" src="images/app_icons/gmail.png">
-            </div></a></section>
-            <section><a href="https://app.sycamoreeducation.com/index.php?schoolid=1426"><div>
-                <img src="images/app_icons/sycamore.png">
-                <p>Sycamore</p>
-            </div></a></section>
-            <section><a href="http://www.facebook.com/"><div>
-                <img class="full" src="images/app_icons/facebook.png">
-            </div></a></section>
-            <section><a href="http://www.sweetmarias.com/"><div>
-                <img class="full" src="images/app_icons/sweetmarias.png">
-            </div></a></section>
-            <section><a href="https://www.mint.com/"><div>
-                <img class="full" src="images/app_icons/mint_logo.png">
-            </div></a></section>
-            <section><a href="chrome-extension://hipbfijinpcgfogaopmgehiegacbhmob/gc-launcher.htm"><div>
-                <img src="images/app_icons/feedly.png">
-                <p>Feedly</p>
-            </div></a></section>
-            <section><a href="http://www.myfitnesspal.com/food/diary/kawillmert"><div>
-                <img class="full" src="images/app_icons/mfp.gif">
-            </div></a></section>
-            <section><a href="http://www.wunderground.com/cgi-bin/findweather/getForecast?query=46938"><div>
-                <img class="full" src="images/app_icons/WeatherUnderground.jpg">
-            </div></a></section>
-            <section><a href="https://services.planningcenteronline.com/dashboard/0"><div>
-                <img class="full" src="images/app_icons/planningcenter.png">
-            </div></a></section>
-<!--  Template
-            <section><a href="#"><div>
-                <img src="images/app_icons/blank.png" title="">
-                <p>Here is a link</p>
-            </div></a></section>
--->
-        </div>
-        </main>
+</body>
 
-        </div>
-        </div>
-
-    </body>
 </html>

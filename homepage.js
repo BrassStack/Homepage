@@ -1,3 +1,217 @@
+// REMOVE THIS LINE WHEN UPLOADING TO A WEB SERVER //
+// This allows you to use localStorage on a local file in IE if you have the localhost IP address in trusted sites
+!localStorage && (l = location, p = l.pathname.replace(/(^..)(:)/, "$1$$"), (l.href = l.protocol + "//127.0.0.1" + p));
+/////////////////////////////////////////////////////
+
+/**
+ * WISHLIST:
+ * - Option to edit existing link (change image, label, url)
+ * - Spacers are still sticking around in section togglers when deleted (but probably not worth fixing, page refresh takes care of it...)
+ */
+
+var pageSections = [];
+var origSection = '';
+
+var importing = false;
+var importText = ''; // Since the import text is needed in the unload function, need to store it here; it appears that DOM element contents aren't available during unload.
+
+function initPage()
+{
+    try {
+        var savedLinks = JSON.parse( localStorage.getItem( 'savedLinks' ) );
+
+        if ( savedLinks )
+        {
+            for ( var i = 0; i < savedLinks.length; i++ )
+            {
+                pageSections[i] = new Section( savedLinks[i]['label'], savedLinks[i]['links'] );
+                pageSections[i].init( i );
+            }
+        }
+    }
+    catch( error ) {
+        alert( 'Page data could not be loaded successfully - this is probably due to an error in import text.  If this was an import issue, the previous page state will now be reloaded.' );
+
+        // Reset pageSections and DOM in case the first "try" added some content before failing
+        pageSections = [];
+        document.getElementById( 'sections' ).innerHTML = '';
+
+        try {
+            var backedUpLinks = JSON.parse( localStorage.getItem( 'backedUpLinks' ) );
+            
+            for ( var i = 0; i < backedUpLinks.length; i++ )
+            {
+                pageSections[i] = new Section( backedUpLinks[i]['label'], backedUpLinks[i]['links'] );
+                pageSections[i].init( i );
+            }
+        }
+        catch( error2 ) {
+            alert('Load of backed up data failed; data was corrupt or did not exist.');
+            pageSections = [];
+            document.getElementById( 'sections' ).innerHTML = '';
+        }
+    }
+
+    if ( pageSections.length == 0 )
+    {
+        showAddDialogue();
+    }
+
+    $.contextMenu({
+        selector: 'section',
+        items: {
+            "up": { name: "Move Up", callback: function( key, options ) { moveLink( options.$trigger[0], 'up' ); } },
+            "down": { name: "Move Down", callback: function( key, options ) { moveLink( options.$trigger[0], 'down' ); } },
+            "sep1": "---------",
+            "delete": { name: "Delete", callback: function( key, options ) { deleteLink( options.$trigger[0].id ); } }
+        }
+    });
+
+    $.contextMenu({
+        selector: '.main > h1',
+        items: {
+            "sup": { name: "Move Section Up", callback: function( key, options ) { moveSection( options.$trigger[0].parentNode, 'up' ); } },
+            "sdown": { name: "Move Section Down", callback: function( key, options ) { moveSection( options.$trigger[0].parentNode, 'down' ); } },
+            "ssep": "---------",
+            "sdelete": { name: "Delete Section", callback: function( key, options ) { deleteSection( options.$trigger[0].parentNode.id ); } }
+        }
+    });
+}
+
+function Section( label, links )
+{
+    this.label = label;
+    this.links = links;
+    
+    this.id = null;
+
+    this.init = function ( sectionId )
+    {
+        this.id = sectionId;
+
+        var newSection = document.createElement( 'div' );
+        newSection.className = 'main';
+        newSection.id = this.id;
+        if ( this.label != '#BLANK#' )
+        {
+            var newSectionTitle = document.createElement( 'h1' );
+            newSectionTitle.innerHTML = this.label;
+            newSection.appendChild( newSectionTitle );
+
+            document.getElementById( 'sections' ).appendChild( newSection );
+
+            var newSectionToggler = document.createElement( 'a' );
+            newSectionToggler.id = this.label;
+            newSectionToggler.class = 'toggle';
+            newSectionToggler.href = 'javascript:ToggleDisplay( document.getElementById( "' + this.id + '" ) );';
+            newSectionToggler.innerHTML = this.label;
+
+            var header = document.getElementById( 'header' );
+
+            if ( header.childNodes.length > 0 )
+            {
+                // \u00A0 = &nbsp;
+                header.appendChild( document.createTextNode( '\u00A0\u00A0\u00A0|\u00A0\u00A0\u00A0' ) );
+            }
+
+            header.appendChild( newSectionToggler );
+        }
+        else
+        {
+            var sections = document.getElementById( 'sections' );
+            sections.insertBefore( newSection, sections.childNodes[0] );
+        }
+
+
+        if ( this.links.length )
+        {
+            for ( var i = 0; i < this.links.length; i++ )
+            {
+                this.links[i] = new Link( this.links[i]['href'], this.links[i]['label'], this.links[i]['imgSource'] );
+                this.links[i].init( this.id, i );
+            }
+        }
+    }
+
+    this.addLink = function ( link )
+    {
+        var newLinkId = this.links.length;
+        this.links[newLinkId] = link;
+        this.links[newLinkId].init( this.id, newLinkId );
+    }
+
+    // Returns 'true' if the section is 'empty' (no links in it) and the DOM elements for it were deleted;
+    // otherwise, false
+    this.deleteIfEmpty = function() {
+        var foundLink = false;
+        for ( var i = 0; i < this.links.length; i++ ) {
+            if ( this.links[i] != 'deleted' ) {
+                foundLink = true;
+                break;
+            }
+        }
+
+        if ( foundLink ) {
+            return false;
+        }
+        else {
+            this.deleteDomElements();
+            return true;
+        }
+    }
+
+    this.deleteDomElements = function() {
+        if ( this.label != '#BLANK#' ) {
+            var sectionToggler = document.getElementById( this.label );
+            sectionToggler.parentNode.removeChild( sectionToggler );
+        }
+
+        var section = document.getElementById( this.id );
+        section.parentNode.removeChild( section );
+    }
+}
+
+function Link( href, label, imgSource )
+{
+    this.href      = href;
+    this.label     = label;
+    this.imgSource = imgSource;
+
+    this.id = null;
+
+    this.init = function ( sectionId, linkId )
+    {
+        this.id = sectionId.toString() + '-' + linkId.toString();
+
+        var newSection = document.createElement( 'section' );
+        newSection.id = this.id;
+
+        var newLink = document.createElement( 'a' );
+        newLink.href = this.href;
+        newLink.title = this.label;
+        
+        var newDiv = document.createElement( 'div' );
+
+        var newImg = document.createElement( 'img' );
+        newImg.src = this.imgSource;
+
+        var newLabel = document.createElement( 'p' );
+        newLabel.innerHTML = this.label;
+
+        newDiv.appendChild( newImg );
+        newDiv.appendChild( newLabel );
+        newLink.appendChild( newDiv );
+        newSection.appendChild( newLink );
+        document.getElementById( sectionId ).appendChild( newSection );
+    }
+
+    this.delete = function() {
+        var link = document.getElementById( this.id );
+        link.parentNode.removeChild( link );
+    }
+}
+
+
 function ToggleDisplay( obj )
 {
     if( obj.style.fontSize == "0%" )
@@ -10,95 +224,222 @@ function ToggleDisplay( obj )
     return true;
 }
 
-// REMOVE THIS LINE WHEN UPLOADING TO A WEB SERVER //
-// This allows you to use localStorage on a local file in IE if you have the localhost IP address in trusted sites
-!localStorage && (l = location, p = l.pathname.replace(/(^..)(:)/, "$1$$"), (l.href = l.protocol + "//127.0.0.1" + p));
-/////////////////////////////////////////////////////
 
-var pageSections = [];
-
-function initPage()
+function showAddDialogue()
 {
-    var savedLinks = JSON.parse( localStorage.getItem( 'savedLinks' ) );
+    document.getElementById( 'inputUrl' ).value   = '';
+    document.getElementById( 'inputLabel' ).value = '';
+    document.getElementById( 'inputImg' ).value   = '';
 
-    if ( savedLinks )
+    origSection = document.getElementById( 'inputSection' ).value;
+
+    document.getElementById( 'addDialogue' ).classList.remove( 'hidden' );
+}
+
+function addNewLink()
+{
+    var newLinkSection = document.getElementById( 'inputSection' ).value;
+    if ( newLinkSection.trim() == '' )
     {
-        for ( var i = 0; i < savedLinks.length; i++ )
-        {
-            pageSections[i] = new Section( savedLinks[i]['label'], savedLinks[i]['links'] );
-            pageSections[i].init( i );
-        }
+        newLinkSection = '#BLANK#'
     }
 
-    if ( pageSections.length == 0 )
+    var newLinkImg = document.getElementById( 'inputImg' ).value;
+    if ( newLinkImg.trim() == '' )
     {
-        // if nothing was found, bring up the dialogue box to add a link/section here
+        newLinkImg = 'images/default_link.png'
+    }
+
+    var newLink = new Link
+    (
+        document.getElementById( 'inputUrl' ).value,
+        document.getElementById( 'inputLabel' ).value,
+        newLinkImg
+    );
+
+    var sectionNotFound = true;
+
+    for ( var i = 0; i < pageSections.length; i++ )
+    {
+        if ( pageSections[i].label == newLinkSection )
+        {
+            pageSections[i].addLink( newLink );
+            sectionNotFound = false;
+            break;
+        }
+    }
+    
+    if ( sectionNotFound )
+    {
+        var i = pageSections.length;
+        newLink = [ newLink ];
+
+        pageSections[i] = new Section( newLinkSection, newLink );
+        pageSections[i].init( i );
+    }
+
+    document.getElementById( 'addDialogue' ).classList.add( 'hidden' );
+}
+
+function cancelAddLink()
+{
+    document.getElementById( 'addDialogue' ).classList.add( 'hidden' );
+    document.getElementById( 'inputSection' ).value = origSection;
+}
+
+
+function showImportExportDialogue()
+{
+    document.getElementById( 'importExportText' ).value = JSON.stringify( getCleanPageSections() );
+    document.getElementById( 'importExportDialogue' ).classList.remove( 'hidden' );
+}
+
+function importContent()
+{
+    importing = true;
+    importText = document.getElementById( 'importExportText' ).value;
+    location.reload( true );
+}
+
+function closeImportExport()
+{
+    document.getElementById( 'importExportDialogue' ).classList.add( 'hidden' );
+}
+
+
+function deleteLink( linkId )
+{
+    var sectionIndex = linkId.split( '-' )[0];
+    var linkIndex    = linkId.split( '-' )[1];
+
+    // Rather than actually deleting an indexed position in pageSections, just place a 'deleted'
+    // string in the position that used to hold the reference to the now-deleted link (or section);
+    // This prevents having to write a whole lot of messy code to update the IDs on all of the DOM
+    // elements whose IDs are derived from their indexes in pageSections.  These types of placeholder
+    // strings are cleaned out of pageSections before it is stored in localStorage when the page
+    // unloads
+    pageSections[sectionIndex].links[linkIndex].delete();
+    pageSections[sectionIndex].links[linkIndex] = 'deleted';
+    
+    // Check to see if section is empty, and if so, delete it, too.
+    var wasEmpty = pageSections[sectionIndex].deleteIfEmpty();
+
+    if ( wasEmpty ) {
+        pageSections[sectionIndex] = 'deleted';
     }
 }
 
-function Section( label, links )
+function moveLink( linkNode, direction )
 {
-    this.label = label;
-    this.links = links;
+    if ( direction == 'up') {
+        // Don't allow an 'up' move if the link is currently the first element in the
+        // section, not including the label h1 tag
+        if ( linkNode.previousSibling != null && linkNode.previousSibling.tagName != 'H1' ) {
+            $( linkNode ).insertBefore( linkNode.previousSibling );
+        }
+    }
+    else {
+        // Don't allow a 'down' move if the link is currently the last element in the section
+        if ( linkNode.nextSibling != null ) {
+            $( linkNode ).insertAfter( linkNode.nextSibling );
+        }
+    }
+}
 
-    this.init = function ( sectionId ) {
-        var newSection = document.createElement( 'div' );
-        newSection.className = 'main';
-        /*
-        NEED TO DO SOMETHING WITH THE SECTION LABEL
-        */
-        newSection.id = sectionId;
-        document.getElementById( 'links' ).appendChild( newSection );
 
-        if ( this.links.length )
-        {
-            for ( var i = 0; i < this.links.length; i++ )
-            {
-                this.links[i] = new Link( this.links[i]['href'], this.links[i]['label'], this.links[i]['imgSource'] );
-                this.links[i].init( sectionId, i );
+function deleteSection( sectionId )
+{
+    pageSections[sectionId].deleteDomElements();
+    pageSections[sectionId] = 'deleted';
+}
+
+function moveSection( sectionNode, direction )
+{
+    if ( direction == 'up') {
+        // Don't allow an 'up' move if the section is currently the first element in the
+        // group of sections, not including the label-less section (if it exists)
+        if ( sectionNode.previousSibling != null && pageSections[sectionNode.previousSibling.id].label != '#BLANK#' ) {
+            $( sectionNode ).insertBefore( sectionNode.previousSibling );
+        }
+    }
+    else {
+        // Don't allow a 'down' move if the link is currently the last element in the section
+        if ( sectionNode.nextSibling != null ) {
+            $( sectionNode ).insertAfter( sectionNode.nextSibling );
+        }
+    }
+}
+
+
+function getCleanPageSections()
+{
+    // Return a "clean" version of pageSections for localStorage or for export by rebuilding
+    // the usual contents of pageSections starting from the DOM:
+    //  - placeholder strings for deleted links or sections removed
+    //  - sections and links listed in the order they appear on the page
+    //  - IDs of sections and links nulled out
+    var cleanVersion = [];
+
+    var sections = $('div.main');
+    
+    for ( var i = 0; i < sections.length; i++ ) {
+        for ( var j = 0; j < sections[i].childNodes.length; j++ ) {
+            var thisNode = sections[i].childNodes[j];
+
+            // If this is the first child-node of the section, then we need to derive the section label
+            // and instantiate a new Section object for it
+            if ( j == 0 ) {
+                // Account for the fact that the user could have the label-less section at the top of the page
+                if ( thisNode.tagName == 'H1' ) {
+                    cleanVersion[i] = new Section( thisNode.innerHTML, [] );
+                }
+                else {
+                    cleanVersion[i] = new Section( '#BLANK#', [] );
+                }
+            }
+
+            if ( thisNode.tagName == 'SECTION' ) {
+                var sectionIndex = thisNode.id.split( '-' )[0];
+                var linkIndex    = thisNode.id.split( '-' )[1];
+
+                var linkObject = pageSections[sectionIndex].links[linkIndex];
+
+                var href      = linkObject.href;
+                var label     = linkObject.label;
+                var imgSource = linkObject.imgSource;
+
+                var link = new Link( href, label, imgSource );
+
+                var newLinkIndex = cleanVersion[i].links.length;
+                cleanVersion[i].links[newLinkIndex] = link;
             }
         }
     }
-}
-
-function Link( href, label, imgSource )
-{
-    this.href      = href;
-    this.label     = label;
-    this.imgSource = imgSource;
-
-    this.init = function ( sectionId, linkId ) {
-        var newLink = document.createElement( 'a' );
-        newLink.href = this.href;
-        newLink.title = this.label;
-        newLink.id = sectionId.toString() + '.' + linkId.toString();;
-        
-        var newSection = document.createElement( 'section' );
-        var newDiv = document.createElement( 'div' );
-
-        var newImg = document.createElement( 'img' );
-        newImg.src = this.imgSource;
-
-        var newLabel = document.createElement( 'p' );
-        newLabel.innerHTML = this.label;
-
-        newDiv.appendChild( newImg );
-        newDiv.appendChild( newLabel );
-        newSection.appendChild( newDiv );
-        newLink.appendChild( newSection );
-        document.getElementById( sectionId ).appendChild( newLink );
-    }
+    
+    return cleanVersion;
 }
 
 function savePageState()
 {
-    if ( pageSections.length > 0 )
-    {
-        localStorage.setItem( 'savedLinks', JSON.stringify( pageSections ) );
+    var saveData = '';
+
+    if ( importing ) {
+        saveData = importText;
+        localStorage.setItem( 'savedLinks', saveData );
+
+        backupData = JSON.stringify( getCleanPageSections() );
+        localStorage.setItem( 'backedUpLinks', backupData );
     }
-    else
-    {
-        localStorage.removeItem( 'savedLinks' );
+    else {
+        if ( pageSections.length > 0 )
+        {
+            saveData = JSON.stringify( getCleanPageSections() );
+            localStorage.setItem( 'savedLinks', saveData );
+        }
+        else
+        {
+            localStorage.removeItem( 'savedLinks' );
+        }
     }
 }
 
@@ -114,19 +455,14 @@ window.addEventListener
 /*************************************************************************/
 function debugFunc()
 {
-    if ( pageSections.length == 0 )
-    {
-        var newLink = [ { 'href':'https://www.google.com', 'label':'Google', 'imgSource':'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' } ];
-        pageSections[0] = new Section( 'Debug', newLink );
-        pageSections[0].init( 0 );
-    }
-    else
-    {
-        alert( 'Page already has some stuff...' );
-    }
+    var stringo = JSON.stringify( pageSections );
+    alert( stringo );
+    stringo = JSON.stringify( getCleanPageSections() );
+    alert( stringo );
 }
 
-function debugFunc2() {
+function debugFunc2()
+{
     pageSections = [];
     if ( pageSections.length == 0 )
     {

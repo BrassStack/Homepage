@@ -1,13 +1,17 @@
-.xhtml {
-    height: 100%;
-    overflow: hidden;
-}
-.xbody {
+body {
+    padding: 0px;
+    margin: 0px;
     background:  #142430;
     color: #ccc;
     text-shadow: 1px 1px 10px #fff;
     text-align: center;
     font-family: "Arial", sans-serif;
+}
+.xhtml {
+    height: 100%;
+    overflow: hidden;
+}
+.xbody {
     padding: 0px;
     margin: 0px;
     height: 100%;
@@ -32,7 +36,7 @@ main:before {
 }
 
 #slide:before {
-  background-image: url("images/bg.jpg");
+  background-image: url("images/bg.png");
   transform: translateZ(-1px) scale(2,2);
   z-index:-1;
 }
@@ -89,18 +93,22 @@ a {
     margin: 0;
     padding: 0;
     border: none;
+    transition: color 200ms ease-in;
 }
-a:hover {
+a:hover, 
+#importExportLink:hover,
+#addLink:hover {
     color: #fff;
 }
 
 /* Header menu links */
 menu {
-    color: #ccc;
     position: fixed;
     top: 0px;
     margin: 0px;
     z-index: 10;
+    padding: 0px;
+    width: 100%;
 }
 menu a {
     font-size: 150%;
@@ -116,6 +124,7 @@ h1 {
     letter-spacing: 0.5em;
     transition: color 200ms ease-in;
     text-shadow: 1px 1px 10px #142430;
+    cursor: default;
 }
 
 /* Link images */
@@ -136,6 +145,85 @@ p {
     margin: 5px 0px 0px 0px;
     padding: 0px;
     border: none;
+}
+
+/* Link add dialogue */
+#addLink {
+    font-size: 150%;
+    cursor: pointer;
+    position: fixed;
+    top: 1em;
+    left: 1em;
+    z-index: 10;
+    transition: color 200ms ease-in;
+}
+
+#addDialogue {
+    background-color: rgba(0, 0, 0, 0.85);
+    /* NEED TO MAKE RESPONSIVE */
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    margin: 0em;
+    top: 0em;
+    padding-top: 10%;
+    z-index: 10;
+}
+
+button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25px;
+    padding: 0.25em 0.5em 0.25em 0.5em;
+    font-size: 150%;
+    background: none;
+    border: .1em solid #ccc;
+    border-radius: 1em;
+    color: #ccc;
+    text-shadow: 1px 1px 10px #fff;
+    cursor: pointer;
+    transition: all 100ms linear;
+}
+
+/* Import/export dialogue */
+#importExportLink {
+    font-family: Wingdings;
+    font-size: 150%;
+    cursor: pointer;
+    position: fixed;
+    top: 1em;
+    right: 2em;
+    z-index: 10;
+    text-shadow: #fff 2px 2px 10px, 2px 2px 10px #fff;
+    transition: color 200ms ease-in;
+}
+
+#importExportDialogue {
+    background-color: rgba(0, 0, 0, 0.85);
+    /* NEED TO MAKE RESPONSIVE */
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    margin: 0em;
+    top: 0em;
+    padding-top: 10%;
+    z-index: 10;
+}
+
+#importExportText {
+    width: 70%;
+    height: 20%;
+}
+
+
+button:hover {
+    border-color: #33478b;
+    box-shadow: 0em 0em 1em #fff;
+}
+
+.hidden {
+    display: none;
 }
 
 /* Shrink to icons only on small screens */
