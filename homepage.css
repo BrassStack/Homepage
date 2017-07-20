@@ -1,8 +1,8 @@
-html {
+.xhtml {
     height: 100%;
     overflow: hidden;
 }
-body {
+.xbody {
     background:  #142430;
     color: #ccc;
     text-shadow: 1px 1px 10px #fff;
@@ -14,7 +14,11 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
 	perspective: 1px;
-	transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
 }
 
 main:before {
@@ -40,7 +44,7 @@ main:before {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    padding-top: 3em;
+    padding-top: 6em;
     align-items: center;
 }
 
@@ -91,6 +95,13 @@ a:hover {
 }
 
 /* Header menu links */
+menu {
+    color: #ccc;
+    position: fixed;
+    top: 0px;
+    margin: 0px;
+    z-index: 10;
+}
 menu a {
     font-size: 150%;
     font-variant: small-caps;
