@@ -195,6 +195,11 @@ function Link( href, label, imgSource )
         var newImg = document.createElement( 'img' );
         newImg.src = this.imgSource;
 
+        if (this.label.trim() == '')
+        {
+            newImg.className = "full";
+        }
+
         var newLabel = document.createElement( 'p' );
         newLabel.innerHTML = this.label;
 
