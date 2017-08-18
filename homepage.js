@@ -295,7 +295,7 @@ function cancelAddLink()
 
 function showImportExportDialogue()
 {
-    document.getElementById( 'importExportText' ).value = JSON.stringify( getCleanPageSections() );
+    document.getElementById( 'importExportText' ).value = JSON.stringify( getCleanPageSections(), null, 3 );
     document.getElementById( 'importExportDialogue' ).classList.remove( 'hidden' );
 }
 
