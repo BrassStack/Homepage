@@ -24,7 +24,7 @@ function initPage()
         {
             for ( var i = 0; i < savedLinks.length; i++ )
             {
-                pageSections[i] = new Section( savedLinks[i]['label'], savedLinks[i]['links'] );
+                pageSections[i] = new Section( savedLinks[i]['label'], savedLinks[i]['links'], savedLinks[i]['state'] );
                 pageSections[i].init( i );
             }
         }
@@ -41,7 +41,7 @@ function initPage()
             
             for ( var i = 0; i < backedUpLinks.length; i++ )
             {
-                pageSections[i] = new Section( backedUpLinks[i]['label'], backedUpLinks[i]['links'] );
+                pageSections[i] = new Section( backedUpLinks[i]['label'], backedUpLinks[i]['links'], backedUpLinks[i]['state'] );
                 pageSections[i].init( i );
             }
         }
@@ -78,10 +78,11 @@ function initPage()
     });
 }
 
-function Section( label, links )
+function Section( label, links, state )
 {
     this.label = label;
     this.links = links;
+    this.state = state;
     
     this.id = null;
 
@@ -120,8 +121,8 @@ function Section( label, links )
         {
             var sections = document.getElementById( 'sections' );
             sections.insertBefore( newSection, sections.childNodes[0] );
+            this.state = '';
         }
-
 
         if ( this.links.length )
         {
@@ -130,6 +131,10 @@ function Section( label, links )
                 this.links[i] = new Link( this.links[i]['href'], this.links[i]['label'], this.links[i]['imgSource'] );
                 this.links[i].init( this.id, i );
             }
+        }
+
+        if ( this.state == 'hidden' ) {
+            ToggleDisplay( document.getElementById( this.id ) );
         }
     }
 
@@ -217,15 +222,42 @@ function Link( href, label, imgSource )
 }
 
 
+function isInt( value ) {
+    if( typeof value === 'number' && ( value % 1 ) === 0 ) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
 function ToggleDisplay( obj )
 {
-    if( obj.style.fontSize == "0%" )
+    // if the item we're toggling is a section, we need to set the section object's state so it will be saved between browser sessions
+    var setItemState = false;
+    var sectionIndex = obj.id.split( '-' )[0] * 1;
+
+    if ( isInt( sectionIndex ) ) {
+        setItemState = true;
+    }
+
+    if( obj.style.fontSize == "0%" ) {
         obj.style.fontSize = obj.oldSize;
-    else
-    {
+
+        if ( setItemState ) {
+            pageSections[sectionIndex]['state'] = 'shown';
+        }
+    }
+    else {
         obj.oldSize = obj.style.fontSize;
         obj.style.fontSize = "0%";
+
+        if ( setItemState ) {
+            pageSections[sectionIndex]['state'] = 'hidden';
+        }
     }
+
     return true;
 }
 
@@ -279,7 +311,7 @@ function addNewLink()
         var i = pageSections.length;
         newLink = [ newLink ];
 
-        pageSections[i] = new Section( newLinkSection, newLink );
+        pageSections[i] = new Section( newLinkSection, newLink, 'shown' );
         pageSections[i].init( i );
     }
 
@@ -396,10 +428,12 @@ function getCleanPageSections()
             if ( j == 0 ) {
                 // Account for the fact that the user could have the label-less section at the top of the page
                 if ( thisNode.tagName == 'H1' ) {
-                    cleanVersion[i] = new Section( thisNode.innerHTML, [] );
+                    var nextNode = thisNode.nextSibling;
+                    var sectionIndex = nextNode.id.split( '-' )[0];
+                    cleanVersion[i] = new Section( thisNode.innerHTML, [], pageSections[sectionIndex]['state'] );
                 }
                 else {
-                    cleanVersion[i] = new Section( '#BLANK#', [] );
+                    cleanVersion[i] = new Section( '#BLANK#', [], '' );
                 }
             }
 
