@@ -477,7 +477,11 @@ function savePageState()
         }
         else
         {
-            localStorage.removeItem( 'savedLinks' );
+            alert('No page sections found when saving!');
+            // localStorage.removeItem( 'savedLinks' );
+            alert(JSON.stringify(pageSections));
+            alert(JSON.stringify(getCleanPageSections()));
+            alert(JSON.stringify(localStorage));
         }
     }
 }

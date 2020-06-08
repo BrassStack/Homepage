@@ -122,7 +122,7 @@ h1 {
     font-variant: small-caps;
     letter-spacing: 0.5em;
     transition: color 200ms ease-in;
-    text-shadow: 1px 1px 10px #142430;
+    text-shadow: 5px 1px 10px #142430;
     cursor: default;
 }
 
