@@ -1,45 +1,51 @@
 body {
-    padding: 0px;
-    margin: 0px;
+    padding: 0;
+    margin: 0;
     background:  #142430;
     color: #ccc;
-    text-shadow: 1px 1px 10px #fff;
+    text-shadow: 0 0 10px #fff;
     text-align: center;
     font-family: "Arial", sans-serif;
 }
-.xhtml {
-    height: 100%;
-    overflow: hidden;
-}
-.xbody {
-    padding: 0px;
-    margin: 0px;
-    height: 100%;
-    overflow-y: scroll;
+.wrapper {
+    height: 100vh;
+    overflow-y: auto;
     overflow-x: hidden;
-	perspective: 1px;
+    perspective: 50px;
+}
+.background {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
     transform-style: preserve-3d;
-    position: fixed;
-    top: 0px;
-    left: 0px;
+    z-index: -1;
+}
+
+.layer1 {
+    transform: translateZ(-50px) scale(2);
+}
+
+.layer2 {
+    transform: translateZ(-25px) scale(1.5);
+    top: -3px;
+    left: 3px;
+}
+
+.layer1, .layer2 {
+    position: absolute;
+    height: 100%;
     width: 100%;
+    object-fit: cover;
+    z-index: -1;
 }
 
-main:before {
-  content: "";
-  position: absolute;
-  top: -190px;
-  bottom: 0;
-  left:0;
-  right:0;
-  height: 1450px;
+main {
+    top: 5em;
+    position: absolute;
 }
 
-#slide:before {
-  background-image: url("images/bg.png");
-  transform: translateZ(-1px) scale(2,2);
-  z-index:-1;
-}
 
 /* Sections of links */
 .main {
@@ -48,7 +54,6 @@ main:before {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    padding-top: 6em;
     align-items: center;
 }
 
@@ -98,6 +103,7 @@ a:hover,
 #importExportLink:hover,
 #addLink:hover {
     color: #fff;
+    text-shadow: 0 0 10px #fff, 0 0 10px #fff;
 }
 
 /* Header menu links */
